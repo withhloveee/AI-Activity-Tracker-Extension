@@ -31,3 +31,11 @@ export function generateGitHubMonth(data = {}, year, month) {
     daysInMonth
   }
 }
+
+export function getLevel(count) {
+  if (count === 0) return 'level-0'
+  if (count <= 2) return 'level-1'
+  if (count <= 5) return 'level-2'
+  if (count <= 9) return 'level-3'
+  return 'level-4'
+}

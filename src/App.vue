@@ -1,13 +1,9 @@
 <template>
-  <div v-for="(cell,index) in data.cells" :key="index">
-    {{ cell }}
+  <div>
+    <Heatmap></Heatmap>
   </div>
-
 </template>
 
 <script setup>
-import { generateGitHubMonth } from './composables/useHeatmap'
-
-const data = generateGitHubMonth()
-console.log(data);
+import Heatmap from './components/Heatmap.vue';
 </script>
