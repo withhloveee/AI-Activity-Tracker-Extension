@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "AI Dashboard",
+  "version": "1.0",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "AI Activity This Month",
+    "default_icon": {
+      "16": "favicon.ico",
+      "32": "favicon.ico"
+    }
+  },
+  "icons": {
+    "16": "favicon.ico",
+    "32": "favicon.ico",
+    "48": "favicon.ico",
+    "128": "favicon.ico"
+  }
+}

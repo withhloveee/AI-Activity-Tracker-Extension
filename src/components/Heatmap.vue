@@ -31,7 +31,24 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted} from 'vue'
 import { generateGitHubMonth, getLevel } from '../composables/useHeatmap'
+
+onMounted(() => {
+  chrome.storage.local.get(['usage'], (result) => {
+    testData.value = result.usage || {}
+
+    console.log('Loaded usage:', testData.value)
+  })
+})
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.usage) {
+    testData.value = changes.usage.newValue || {}
+
+    console.log('Usage updated:', testData.value)
+  }
+})
 
 const weekdays = [
   'Sun',
@@ -43,33 +60,15 @@ const weekdays = [
   'Sat'
 ]
 
-const testData = {
+const testData = ref({
   '2026-07-01': 0,
   '2026-07-02': 1,
   '2026-07-03': 2,
-  '2026-07-04': 3,
-  '2026-07-05': 4,
+})
 
-  '2026-07-06': 0,
-  '2026-07-07': 1,
-  '2026-07-08': 2,
-  '2026-07-09': 3,
-  '2026-07-10': 4,
-
-  '2026-07-11': 0,
-  '2026-07-12': 1,
-  '2026-07-13': 2,
-  '2026-07-14': 3,
-  '2026-07-15': 4,
-
-  '2026-07-16': 0,
-  '2026-07-17': 1,
-  '2026-07-18': 2,
-  '2026-07-19': 3,
-  '2026-07-20': 4
-}
-
-const heatmap = generateGitHubMonth(testData)
+const heatmap = computed(() =>
+  generateGitHubMonth(testData.value)
+)
 </script>
 
 <style scoped>
