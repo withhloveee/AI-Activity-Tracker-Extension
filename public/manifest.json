@@ -1,26 +1,31 @@
 {
   "manifest_version": 3,
-  "name": "AI Dashboard",
+  "name": "AI Footprints - Track AI site usage",
+  "description": "Track AI usage and activity over time.",
   "version": "1.0",
+
   "permissions": [
     "storage",
     "tabs"
   ],
+
   "background": {
     "service_worker": "background.js"
   },
+
   "action": {
     "default_popup": "index.html",
     "default_title": "AI Activity This Month",
     "default_icon": {
-      "16": "favicon.ico",
-      "32": "favicon.ico"
+      "16": "logo.png",
+      "32": "logo.png"
     }
   },
+
   "icons": {
-    "16": "favicon.ico",
-    "32": "favicon.ico",
-    "48": "favicon.ico",
-    "128": "favicon.ico"
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
   }
 }

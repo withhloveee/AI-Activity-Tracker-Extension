@@ -31,23 +31,28 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted} from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { generateGitHubMonth, getLevel } from '../composables/useHeatmap'
 
-onMounted(() => {
-  chrome.storage.local.get(['usage'], (result) => {
-    testData.value = result.usage || {}
+const usageData = ref({})
 
-    console.log('Loaded usage:', testData.value)
-  })
+// {changes} and {area} are provided by the browser.
+function updateUsageFromStorage(changes, area) {
+  if (area === 'local' && changes.usage) {
+    usageData.value = changes.usage.newValue || {}
+  }
+}
+
+onMounted(async () => {
+  const result = await chrome.storage.local.get('usage')
+  usageData.value = result.usage || {}
+
+  chrome.storage.onChanged.addListener(updateUsageFromStorage)
 })
 
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.usage) {
-    testData.value = changes.usage.newValue || {}
-
-    console.log('Usage updated:', testData.value)
-  }
+// to handle {leaking memory}
+onUnmounted(() => {
+  chrome.storage.onChanged.removeListener(updateUsageFromStorage)
 })
 
 const weekdays = [
@@ -60,14 +65,8 @@ const weekdays = [
   'Sat'
 ]
 
-const testData = ref({
-  '2026-07-01': 0,
-  '2026-07-02': 1,
-  '2026-07-03': 2,
-})
-
 const heatmap = computed(() =>
-  generateGitHubMonth(testData.value)
+  generateGitHubMonth(usageData.value)
 )
 </script>
 

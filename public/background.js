@@ -1,77 +1,72 @@
-console.log("🚀 Background Service Worker Started")
-
-const AI_SITES = [
+const TRACKED_SITES = [
   "chatgpt.com",
   "claude.ai",
   "gemini.google.com"
 ]
 
-// Track last-recorded tab+url so we don't double count
-// repeated "complete" events for the same page load
-const lastRecorded = new Map() // tabId -> url
+const STORAGE_KEY = "usage"
+
+// Tracks the last counted URL per tab to avoid duplicate "complete" events.
+const lastRecordedUrlByTab = new Map()
+let storageWriteQueue = Promise.resolve()
 
 function getLocalDateKey() {
-  const d = new Date()
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+
   return `${year}-${month}-${day}`
 }
 
-// Serialize storage writes so concurrent calls don't race
-let writeQueue = Promise.resolve()
-
-function incrementToday(site) {
-  writeQueue = writeQueue.then(() => {
-    return new Promise((resolve) => {
-      const today = getLocalDateKey()
-
-      chrome.storage.local.get(["usage"], (result) => {
-        const usage = result.usage || {}
-
-        usage[today] = (usage[today] || 0) + 1
-
-        chrome.storage.local.set({ usage }, () => {
-          console.log(`✅ Added visit for ${site}`, usage)
-          resolve()
-        })
-      })
-    })
-  })
+async function getUsageData() {
+  const result = await chrome.storage.local.get(STORAGE_KEY)
+  return result[STORAGE_KEY] || {}
 }
 
-chrome.tabs.onUpdated.addListener(
-  (tabId, changeInfo, tab) => {
+// triggers: chrome.storage.onChanged to fire (Heatmap.vue)
+// returns a Promise
+function saveUsageData(usage) {
+  return chrome.storage.local.set({ [STORAGE_KEY]: usage })
+}
 
-    if (changeInfo.status !== "complete")
-      return
+// This function deals with { race condition }
+async function incrementToday() {
+  // working structure:-
+  // first tab: resolved = p0.then()
+  // second tab: po.then() = p1.then()
+  storageWriteQueue = storageWriteQueue.then(async () => {
+    const today = getLocalDateKey()
+    const usage = await getUsageData()
+    usage[today] = (usage[today] || 0) + 1
+    await saveUsageData(usage)
+  }).catch(error => console.error("Failed to save usage data:", error))
 
-    const url = tab.url || ""
+  await storageWriteQueue
+}
 
-    const matchedSite = AI_SITES.find(site =>
-      url.includes(site)
-    )
+function findTrackedSite(url) {
+  return TRACKED_SITES.find((site) => url.includes(site))
+}
 
-    if (!matchedSite)
-      return
-
-    // Skip if we already counted this exact tab+url combo
-    if (lastRecorded.get(tabId) === url)
-      return
-
-    lastRecorded.set(tabId, url)
-
-    console.log("🤖 AI Site Detected:", matchedSite)
-
-    incrementToday(matchedSite)
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  // only take {fully loaded} pages.
+  if (changeInfo.status !== "complete") {
+    return
   }
-)
 
-chrome.storage.local.set({ usage: { test: 1 } }, () => {
-  chrome.storage.local.get("usage", console.log)
+  const url = tab.url || ""
+  const trackedSite = findTrackedSite(url)
+
+  // not match or { bail out to avoid double-counting }
+  if (!trackedSite || lastRecordedUrlByTab.get(tabId) === url) {
+    return
+  }
+
+  lastRecordedUrlByTab.set(tabId, url)
+  incrementToday()
 })
 
-// Clean up map entries when tabs close, to avoid a memory leak
 chrome.tabs.onRemoved.addListener((tabId) => {
-  lastRecorded.delete(tabId)
+  lastRecordedUrlByTab.delete(tabId)
 })
