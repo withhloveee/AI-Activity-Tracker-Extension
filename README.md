@@ -1,6 +1,8 @@
-# AI Activity Tracker Extension
+# AI Footprints - Track AI site usage
 
 A Chrome extension that tracks and visualizes your AI tool usage through an interactive dashboard and GitHub-style activity heatmap.
+
+![view](icons_md/image.png)
 
 ## Features
 
