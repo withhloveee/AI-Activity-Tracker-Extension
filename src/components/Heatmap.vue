@@ -20,7 +20,7 @@
           :key="index"
           class="cell"
           :class="cell ? getLevel(cell.count) : 'empty'"
-          :title="cell ? `${cell.date} - ${cell.count}` : ''"
+          :title="cell ? `${cell.count} times on ${cell.date}.` : ''"
         />
 
       </div>
