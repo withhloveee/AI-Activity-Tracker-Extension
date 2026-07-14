@@ -1,7 +1,14 @@
 const TRACKED_SITES = [
-  "chatgpt.com",
-  "claude.ai",
-  "gemini.google.com"
+  "chatgpt.com",          // ChatGPT
+  "claude.ai",            // Claude
+  "gemini.google.com",    // Gemini
+  "copilot.microsoft.com",// Microsoft Copilot
+  "grok.com",             // Grok
+  "perplexity.ai",        // Perplexity
+  "poe.com",              // Poe
+  "you.com",              // You.com
+  "deepseek.com",         // DeepSeek
+  "character.ai"          // Character AI
 ]
 
 const STORAGE_KEY = "usage"
