@@ -23,6 +23,14 @@ A Chrome extension that tracks and visualizes your AI tool usage through an inte
 
 ## Installation
 
+### 1) Video Tutorial (Recommended)
+
+Follow this guide if you're unfamiliar with loading Chrome extensions manually.
+
+[🎥 Installation Guide](https://youtu.be/EMN_lJvPd2k)
+
+### 2) Manual Installation
+
 1. Clone the repository:
 
 ```bash
